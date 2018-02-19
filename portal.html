@@ -1,0 +1,149 @@
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html">
+        <link href="./style.css" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.1/fetch.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div>
+                <button type="button" class="btn btn-warning" id="logout">Log out</button>
+            </div>
+            <a href="./summary.html">webpage extractor</a>
+            <div>
+                <input list="candidate" id="search" placeholder="search users">
+                <datalist id="candidate">
+                <!-- <option value="Internet Explorer"> -->
+                </datalist>
+            </div>
+            <div class="login-container">
+                    <div>
+                        <p>User Name: <label id="username"></label></p>
+                        <p>First Name: <label id="fname"></label></p>
+                        <p>Last Name: <label id="lname"></label></p>
+                        <p><img id="photo" src=""/></p>
+                    </div>
+                    <button class="btn btn-info btn-block" type="button" id="update">update</button>
+            </div>
+        </div>
+        <script>
+            $(document).ready(() => {
+                var auth = localStorage.getItem("authorization");
+                if(auth) {
+                    var minit = {
+                        method: 'GET',
+                        headers: new Headers({
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('authorization')
+                        })
+                    };
+                    fetch('https://info344.imyyfan.me/v1/users/me', minit)
+                        .then((response) => {
+                            if(response.ok) {
+                                return response.json();
+                            } else {
+                                return response.text()
+                                .then((errorMessage) => {
+                                    alert(errorMessage);
+                                    throw new Error(errorMessage);
+                                });
+                            }
+                        }).then((user) => {
+                            // console.log(user);
+                            $('#username').text(user['userName']);
+                            $('#fname').text(user['firstName']);
+                            $('#lname').text(user['lastName']);
+                            $('#photo').attr('src', user['photoURL']);
+                        }).catch((err) => {
+                            console.log(err);
+                        });
+                } else {
+                    alert("No authorization!");
+                    window.location.href = "login.html";
+                }
+            });
+        </script>
+        <script>
+            $('#logout').on('click', () => {
+                var auth = localStorage.getItem("authorization");
+                if(auth) {
+                    var minit = {
+                        method: 'DELETE',
+                        headers: new Headers({
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('authorization')
+                        })
+                    };
+                    fetch('https://info344.imyyfan.me/v1/sessions/mine', minit)
+                        .then((response) => {
+                            if(response.ok) {
+                                return response.json();
+                            } else {
+                                return response.text()
+                                .then((errorMessage) => {
+                                    alert(errorMessage);
+                                    throw new Error(errorMessage);
+                                });
+                            }
+                        }).then((message) => {
+                            alert("log out successfully!");
+                            localStorage.removeItem("authorization");
+                            window.location.href = 'login.html';
+                        }).catch((err) => {
+                            console.log(err);
+                        });
+                } else {
+                    alert("No authorization!");
+                    window.location.href = "login.html";
+                }
+            });
+            $('#update').on('click', () => {
+                window.location.href = "profile.html";
+            });
+        </script>
+        <script>
+            $('#search').keyup(() => {
+                var auth = localStorage.getItem("authorization");
+                if(auth) {
+                    var minit = {
+                        method: 'GET',
+                        headers: new Headers({
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('authorization')
+                        })
+                    };
+                    var prefix = $('#search').val();
+                    fetch('https://info344.imyyfan.me/v1/users?q='+prefix, minit)
+                        .then((response) => {
+                            if(response.ok) {
+                                return response.json();
+                            } else {
+                                return response.text()
+                                .then((errorMessage) => {
+                                    alert(errorMessage);
+                                    throw new Error(errorMessage);
+                                });
+                            }
+                        }).then((users) => {
+                            // console.log(users);
+                            var candidate = $('#candidate');
+                            $('#candidate option').remove();
+                            $.each(users, (i, user) => {
+                                var info = user['firstName'] + ' ' + user['lastName'] + '(' + user['email'] + ')';
+                                candidate.append('<option value="' + info + '"/>');
+                            });
+                        }).catch((err) => {
+                            console.log(err);
+                        });
+                } else {
+                    alert("No authorization!");
+                    window.location.href = "login.html";
+                }
+            });
+        </script>
+    </body> 
+</html>

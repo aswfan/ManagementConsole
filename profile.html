@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html">
+        <link href="./style.css" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.1/fetch.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="login-container">
+                <div id="output"></div>
+                <div class="avatar"></div>
+                <div class="form-box">
+                    <div class="row div-margin">
+                        <div class="col-md-4 align-middle">First Name:</div>
+                        <div class="col-md-8"> <input type="text" id="fname"></div>
+                    </div>
+                    <div class="row div-margin">
+                        <div class="col-md-4 align-middle">Last Name:</div>
+                        <div class="col-md-8"><input type="text" id="lname"></div>
+                    </div>
+                    <button class="btn btn-info btn-block" id="update">update</button>
+                    <button class="btn btn-danger btn-block" id="back">back</button>
+                </div>
+            </div>
+        </div>
+        <script>
+                    $(document).ready(() => {
+                var auth = localStorage.getItem("authorization");
+                if(auth) {
+                    var minit = {
+                        method: 'GET',
+                        headers: new Headers({
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('authorization')
+                        })
+                    };
+                    fetch('https://info344.imyyfan.me/v1/users/me', minit)
+                        .then((response) => {
+                            if(response.ok) {
+                                return response.json();
+                            } else {
+                                return response.text()
+                                .then((errorMessage) => {
+                                    alert(errorMessage);
+                                    throw new Error(errorMessage);
+                                });
+                            }
+                        }).then((user) => {
+                            // console.log(user);
+                            $('#fname').val(user['firstName']);
+                            $('#lname').val(user['lastName']);
+                        }).catch((err) => {
+                            console.log(err);
+                        });
+                } else {
+                    alert("No authorization!");
+                    window.location.href = "login.html";
+                }
+            });
+        </script>
+        <script>
+            $('#update').on('click', () => {
+                var auth = localStorage.getItem("authorization");
+                if(auth) {
+                    var update = {
+                        'firstName': $('#fname').val(),
+                        'lastName': $('#lname').val()
+                    };
+                    var minit = {
+                        method: 'PATCH',
+                        headers: new Headers({
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('authorization')
+                        }),
+                        body: JSON.stringify(update)
+                    };
+                    fetch('https://info344.imyyfan.me/v1/users/me', minit)
+                        .then((response) => {
+                            if(response.ok) {
+                                return response.json();
+                            } else {
+                                return response.text()
+                                .then((errorMessage) => {
+                                    alert(errorMessage);
+                                    throw new Error(errorMessage);
+                                });
+                            }
+                        }).then((message) => {
+                            alert("update successfully!");
+                            window.location.href = 'portal.html';
+                        }).catch((err) => {
+                            console.log(err);
+                        });
+                } else {
+                    alert("No authorization!");
+                    window.location.href = "login.html";
+                }
+            });
+
+            $('#back').on('click', () => {
+                window.location.href = "portal.html";
+            });
+        </script>
+    </body>
+</html>

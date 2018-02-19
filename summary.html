@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html">
+        <script type="text/javascript" src="jquery-1.10.2.min.js"></script>
+    </head>
+    <body>
+        <h1>Extract summary from web page</h1>
+        <label>From here, typing the webpage your want to extract</label>
+        <input type="text" id="url"/>
+        <input type="button" id="fetch" value="fetch"/>
+        <div>
+            <h1 id="error"></h1>
+            <p>Title: <label id="title"></label></p>
+            <p>Type: <label id="type"></label></p>
+            <p>Site Name: <label id="sitename"></label></p>
+            <p>Description: <label id="description"></label></p>
+            <p>Author: <label id="author"></label></p>
+            <p>Keywords: <label id="keywords"></label></p>
+            <img id="icon" src=""/>
+            <div id="images"> </div>
+        </div>
+
+        <script>
+            $(document).ready(() => {
+                var auth = localStorage.getItem("authorization");
+                if(auth) {
+                    var minit = {
+                        method: 'GET',
+                        headers: new Headers({
+                            'Content-Type': 'application/json',
+                            'Authorization': localStorage.getItem('authorization')
+                        })
+                    };
+                    $('#fetch').on('click', function() {
+                        var url = $('#url').val();
+                        fetch('https://info344.imyyfan.me/v1/summary?url='+url, minit)
+                            .then((response) => {
+                                if(response.ok) {
+                                    return response.json();
+                                } else {
+                                    return response.text()
+                                    .then((errorMessage) => {
+                                        alert(errorMessage);
+                                        throw new Error(errorMessage);
+                                    });
+                                }
+                            }).then((json) => {
+                                // json = JSON.parse(data.responseText);
+                                $('#title').text(json["title"]);
+                                $('#type').text(json["type"]);
+                                $('#sitename').text(json["siteName"]);
+                                $('#description').text(json["description"]);
+                                $('#author').text(json["author"]);
+                                $('#keywords').text(json["keywords"]);
+                                if( "icon" in json) {
+                                    $('#icon').attr("src", json["icon"]["url"]);
+                                }
+                                if("images" in json) {
+                                    $.each(json["images"], function(index, value){
+                                        $('#images').append("<img src='"+value["url"]+"'/>");
+                                    })
+                                }
+                            }).catch((err) => {
+                                console.log(err);
+                            });
+                    });
+                } else {
+                    alert("No authorization!");
+                    window.location.href = "login.html";
+                }
+            });
+        </script>
+    </body>
+</html>

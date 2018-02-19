@@ -1,0 +1,56 @@
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html">
+        <link href="./style.css" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <link href="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+        <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.0/js/bootstrap.min.js"></script>
+        <!-- <script type="text/javascript" src="jquery-1.10.2.min.js"></script> -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.1/fetch.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="login-container">
+                <div id="output"></div>
+                <div class="avatar"></div>
+                <div class="form-box">
+                    <input name="user" type="text" placeholder="email" id="email">
+                    <input type="password" placeholder="password" id="password">
+                    <button class="btn btn-info btn-block login" type="button" id="login">Login</button>
+                    <a href="logon.html">Log on</a>
+                </div>
+            </div>
+        </div>
+        <script>
+            $('#login').on('click', () => {
+                var credentials = {
+                    'email': $('#email').val(),
+                    'password': $('#password').val()
+                };
+                var minit = {
+                    method: 'POST',
+                    headers: new Headers({
+                        'Content-Type': 'application/json'
+                    }),
+                    body: JSON.stringify(credentials)
+                };
+                fetch('https://info344.imyyfan.me/v1/sessions', minit)
+                    .then((response) => {
+                        if(response.ok) {
+                            return response.headers;
+                        } else {
+                            return response.text()
+                            .then((errorMessage) => {
+                                alert(errorMessage);
+                                throw new Error(errorMessage);
+                            });
+                        }
+                    }).then((headers) => {
+                        localStorage.setItem("authorization", headers.get("authorization"));
+                        window.location.href = "portal.html";
+                    });
+            });
+        </script>
+    </body> 
+</html>
