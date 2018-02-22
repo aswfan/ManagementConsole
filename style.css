@@ -55,6 +55,7 @@ html,body{
 }
 
 .avatar{
+    content:url(./person.png);
     width: 100px;height: 100px;
     margin: 10px auto 30px;
     border-radius: 100%;
